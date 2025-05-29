@@ -1,0 +1,145 @@
+https://codeforces.com/contest/2014/problem/E
+// pq solution gave tle but set solution worked
+#include <bits/stdc++.h>
+
+#define ll long long
+#define mr make_pair
+
+using namespace std;
+
+ll max(ll a, ll b){
+    if(a>b) return a;
+    return b;
+}
+
+ll min(ll a, ll b){
+    if(a<b) return a;
+    return b;
+}
+
+int max(int a,int b){
+    if(a>b) return a;
+    return b;
+}
+
+int min(int a,int b){
+    if(a<b) return a;
+    return b;
+}
+
+void f(vector<ll> &v,ll &n){
+   for(ll i = 0;i<n;i++){
+       cin>>v[i];
+   }
+}
+
+void sort(vector<ll>& v){
+    sort(v.begin(),v.end());
+}
+
+void sort(vector<int>& v){
+    sort(v.begin(),v.end());
+}
+
+vector<pair<ll,ll>> dijkstra(ll node,vector<vector<pair<ll,ll>>>& adj,vector<bool>& horse){
+    ll n = adj.size();
+    vector<pair<ll,ll>> dis(n,{1e15,1e15});
+
+   
+
+    bool hr = (horse[node] == 1);
+    set<pair<ll,pair<ll,ll>>> pq;
+
+     if(hr==1){
+         dis[node] = {0,0};
+         pq.insert({0,{hr,node}});
+     }
+     else{
+        dis[node] = {0,1e15};
+        pq.insert({0,{hr,node}});
+     }
+
+
+    while(!pq.empty()){
+         auto it = *(pq.begin());
+         pq.erase(pq.begin());
+
+         ll nd = it.second.second;
+         ll hrr = it.second.first;
+         ll dist = it.first;
+
+         for(auto itt : adj[nd]){
+            ll wt = itt.second;
+            if(hrr == 1) wt=wt/2;
+
+            bool hvar = hrr||horse[itt.first];
+
+            if(hvar==0 && dis[itt.first].first>dist+wt && dist+wt<dis[itt.first].second){
+                auto it1 = pq.find({dis[itt.first].first,{0,itt.first}});
+                if(it1 != pq.end()) pq.erase(it1);
+                dis[itt.first].first = dist+wt;
+                pq.insert({dis[itt.first].first,{hvar,itt.first}});
+            }
+            if(hvar==1 && dis[itt.first].second>dist+wt){
+                dis[itt.first].second = dist+wt;
+                auto it1 = pq.find({dis[itt.first].first,{0,itt.first}});
+                if(dis[itt.first].first>=dis[itt.first].second && it1!=pq.end()) pq.erase(it1);
+                pq.insert({dis[itt.first].second,{hvar,itt.first}});
+            }
+         }
+    }
+
+    return dis;
+}
+
+int main(){
+     ll t;
+     cin>>t;
+
+     while(t--){
+        ll n,m,h;
+        cin>>n>>m>>h;
+
+        vector<bool> horse(n,0);
+
+        for(ll i=0;i<h;i++){
+            ll x;
+            cin>>x;
+            horse[x-1] = 1;
+        }
+
+        vector<vector<pair<ll,ll>>> adj(n);
+
+        for(ll i=0;i<m;i++){
+            ll u,v,w;
+            cin>>u>>v>>w;
+
+            adj[u-1].push_back({v-1,w});
+            adj[v-1].push_back({u-1,w});
+        }
+
+
+        vector<pair<ll,ll>> t1 = dijkstra(0,adj,horse);
+        vector<pair<ll,ll>> t2 = dijkstra(n-1,adj,horse);
+
+        // for(auto it : t1){
+        //     cout<<it.first<<" "<<it.second<<" ";
+        // }
+        // cout<<endl;
+
+        ll ans = 1e15;
+
+        for(ll i=0;i<n;i++){
+            ans = min(ans,max(min(t1[i].first,t1[i].second),min(t2[i].first,t2[i].second)));
+        }
+
+        if(ans == 1e15){
+            cout<<-1<<endl;
+        }
+        else{
+            cout<<ans<<endl;
+        }
+
+
+     }
+}
