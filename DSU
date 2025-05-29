@@ -38,3 +38,46 @@ class DSU{
        }
 
 };
+
+
+
+class DSU{
+    public: 
+       vector<ll> par;
+       vector<ll> size;
+       ll n;
+       DSU(ll n){
+           this->n = n;
+           par.resize(n);
+           size.resize(n,1);
+
+           for(ll i=0;i<n;i++){
+              par[i] = i;
+           }
+       }
+
+       ll find_par(ll v){
+          if(v==par[v]) return v;
+
+          return par[v] = find_par(par[v]);
+       }
+
+       bool isSameComp(ll u,ll v){
+          return find_par(v) == find_par(u);
+       }
+
+       void union_by_size(ll u,ll v){
+            if(!isSameComp(u,v)){
+                u = find_par(u);
+                v = find_par(v);
+
+                if(size[u]<size[v]) swap(u,v);
+
+                par[v] = u;
+
+                size[u] += size[v];
+            }
+       }
+
+};
+
