@@ -1,0 +1,171 @@
+
+https://codeforces.com/problemset/problem/1245/D
+#include <bits/stdc++.h>
+
+#define ll long long
+#define mr make_pair
+
+using namespace std;
+
+ll max(ll a, ll b){
+    if(a>b) return a;
+    return b;
+}
+
+ll min(ll a, ll b){
+    if(a<b) return a;
+    return b;
+}
+
+int max(int a,int b){
+    if(a>b) return a;
+    return b;
+}
+
+int min(int a,int b){
+    if(a<b) return a;
+    return b;
+}
+
+void f(vector<ll> &v,ll &n){
+   for(ll i = 0;i<n;i++){
+       cin>>v[i];
+   }
+}
+
+void sort(vector<ll>& v){
+    sort(v.begin(),v.end());
+}
+
+void sort(vector<int>& v){
+    sort(v.begin(),v.end());
+}
+
+
+
+class DSU{
+    public: 
+       vector<ll> par;
+       vector<ll> rank;
+       ll n;
+       DSU(ll n){
+           this->n = n;
+           par.resize(n);
+           rank.resize(n,0);
+
+           for(ll i=0;i<n;i++){
+              par[i] = i;
+           }
+       }
+
+       ll find_par(ll v){
+          if(v==par[v]) return v;
+
+          return par[v] = find_par(par[v]);
+       }
+
+       bool isSameComp(ll u,ll v){
+          return find_par(v) == find_par(u);
+       }
+
+       void union_by_rank(ll u,ll v){
+            if(!isSameComp(u,v)){
+                u = find_par(u);
+                v = find_par(v);
+
+                if(rank[u]<rank[v]) swap(u,v);
+
+                par[v] = u;
+
+                if(rank[u] == rank[v]) rank[u]++;
+            }
+       }
+
+};
+
+
+
+int main(){
+     ll n;
+     cin>>n;
+
+     vector<pair<ll,ll>> v(n);
+
+     for(ll i=0;i<n;i++){
+         cin>>v[i].first>>v[i].second;
+     }
+
+
+     vector<ll> c(n);
+     f(c,n);
+
+     vector<ll> k(n);
+     f(k,n);
+
+
+     vector<vector<ll>> edges;
+
+     for(ll i=0;i<v.size();i++){
+        for(ll j=i+1;j<v.size();j++){
+             vector<ll> temp;
+             temp.push_back(i+1);
+             temp.push_back(j+1);
+             temp.push_back((k[i]+k[j])*(abs(v[i].first-v[j].first)+abs(v[i].second-v[j].second)));
+
+             edges.push_back(temp);
+        }
+     }
+
+     for(ll i=0;i<n;i++){
+        vector<ll> temp;
+        temp.push_back(i+1);
+        temp.push_back(0);
+        temp.push_back(c[i]);
+
+        edges.push_back(temp);
+     }
+
+     sort(edges.begin(),edges.end(),
+    [](auto &p,auto& q){ return p[2]<q[2];});
+
+    vector<ll> pow;
+    vector<pair<ll,ll>> conn;
+
+    DSU d(n+1);
+    ll cost = 0;
+
+    for(auto it: edges){
+        ll u = it[0];
+        ll v = it[1];
+        ll wt = it[2];
+
+        if(d.isSameComp(u,v)) continue;
+
+        d.union_by_rank(u,v);
+
+        cost += wt;
+
+        if(v == 0){
+           pow.push_back(u);
+        }
+        else{
+           conn.push_back({u,v});
+        }
+
+    }
+
+    cout<<cost<<endl;
+    cout<<pow.size()<<endl;
+
+    for(auto it : pow){
+        cout<<it<<" ";
+    }
+    cout<<endl;
+
+    cout<<conn.size()<<endl;
+    for(auto it : conn){
+        cout<<it.first<<" "<<it.second<<endl;
+    }
+
+}
+
