@@ -1,0 +1,57 @@
+void dfs(vector<vector<ll>>& adj,ll node,vector<ll>& vis,vector<ll>& topo){
+    vis[node] = 1;
+    for(auto it : adj[node]){
+        if(!vis[it]) dfs(adj,it,vis,topo);
+    }
+
+     topo.push_back(node);
+}
+
+void rev_dfs(vector<vector<ll>>& adj,ll node,vector<ll>& vis,vector<vector<ll>>& comp){
+    vis[node] = 1;
+    for(auto it : adj[node]){
+        if(!vis[it]) rev_dfs(adj,it,vis,comp);
+    }
+
+     comp.back().push_back(node);
+}
+
+vector<vector<ll>> scc(vector<vector<ll>>& adj){
+    ll n = adj.size();
+
+    vector<ll> topo;
+    vector<ll> vis(n,0);
+
+    for(ll i=0;i<n;i++){
+        if(!vis[i]){
+            dfs(adj,i,vis,topo);
+        }
+    }
+
+    reverse(topo.begin(),topo.end());
+
+    
+    vector<vector<ll>> rev_adj(n);
+
+    for(ll i=0;i<n;i++){
+        for(auto it : adj[i]){
+            rev_adj[it].push_back(i);
+        }
+    }
+
+    vector<vector<ll>> comp;
+
+    for(ll i=0;i<n;i++){
+        vis[i] = 0;
+    }
+
+    for(ll i=0;i<topo.size();i++){
+        if(!vis[topo[i]]){
+            comp.push_back({});
+            rev_dfs(rev_adj,topo[i],vis,comp);
+        }
+    }
+
+    
+    return comp;
+}
