@@ -24,7 +24,7 @@ vector<ll> topologicalSort(vector<vector<ll>>& adj){
         topo.push_back(node);
         for(auto it : adj[node]){
             indeg[it]--;
-            if(indeg[it] == 0) topo.push_back(it);
+            if(indeg[it] == 0) q.push(it);
         }
     }
 
