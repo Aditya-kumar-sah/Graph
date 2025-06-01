@@ -1,0 +1,93 @@
+https://leetcode.com/problems/minimum-moves-to-clean-the-classroom/
+
+// tuple,hashing optimization
+#define ll long long
+
+class Solution {
+public:
+    int minMoves(vector<string>& classroom, int energy) {
+        ll mini = 1e10;
+        ll n = classroom.size();
+        ll m = classroom[0].size();
+        unordered_map<ll,ll> mp;
+
+        ll r,c;
+        ll tot = 0;
+
+        for(ll i=0;i<n;i++){
+            for(ll j=0;j<m;j++){
+                if(classroom[i][j] == 'L'){
+                  ll num = i*m+j;
+                  mp[num] = tot;
+                  tot++;
+                }
+                if(classroom[i][j] == 'S'){
+                    r = i;
+                    c = j;
+                }
+            }
+        }
+
+        bool vis[20][20][51][1<<10];
+        memset(vis,0,sizeof(vis));
+
+        ll mask=0;
+       
+        queue<tuple<ll,ll,ll,ll,ll>> q;
+        q.emplace(r,c,energy,mask,0);
+        vis[r][c][energy][mask] = 1;
+        vector<ll> dr = {-1,0,1,0};
+        vector<ll> dc = {0,-1,0,1};
+
+
+        while(!q.empty()){
+            auto [rr,cc,ee,mm,steps] = q.front();
+            q.pop();
+
+            // ll rr = it[0];
+            // ll cc = it[1];
+            // ll ee = it[2];
+            // ll mm = it[3];
+            // ll steps = it[4];
+
+            if(mm == ((1ll<<tot)-1)){
+                return steps;
+            }
+            if(ee == 0) continue;
+
+            for(ll i=0;i<4;i++){
+                ll nr = dr[i]+rr;
+                ll nc = dc[i]+cc;
+
+                if(nr>=0 && nr<n && nc>=0 && nc<m){
+                     if(classroom[nr][nc] == 'R' && !vis[nr][nc][energy][mm]){
+                         q.emplace(nr,nc,energy,mm,steps+1);
+                         vis[nr][nc][energy][mm] = 1;
+                     }
+                     if(classroom[nr][nc] == 'L'){
+                         ll num = nr*m+nc;
+                         ll nmm = (1ll<<mp[num])|mm;
+                         if(!vis[nr][nc][ee-1][nmm]){
+                            q.emplace(nr,nc,ee-1,nmm,steps+1);
+                            vis[nr][nc][ee-1][nmm] = 1;
+                         }
+                     }
+                     if(classroom[nr][nc] == 'S' && !vis[nr][nc][ee-1][mm]){
+                         q.emplace(nr,nc,ee-1,mm,steps+1);
+                         vis[nr][nc][ee-1][mm] = 1;
+                     }
+                     if(classroom[nr][nc] == '.' && !vis[nr][nc][ee-1][mm]){
+                         q.emplace(nr,nc,ee-1,mm,steps+1);
+                         vis[nr][nc][ee-1][mm] = 1;
+                     }
+                }
+            }
+
+        }
+
+
+        if(mini == 1e10) return -1;
+        
+        return mini;
+    }
+};
