@@ -1,0 +1,37 @@
+
+vector<ll> dijk(vector<vector<pair<ll,ll>>>& adj,ll node){
+
+    ll n = adj.size();
+
+    priority_queue<pair<ll,ll>,vector<pair<ll,ll>>,greater<pair<ll,ll>>> pq;
+    vector<ll> dis(n,1e15);
+    vector<ll> par(n);
+
+    for(ll i=0;i<n;i++){
+        par[i] = i;
+    }
+
+    dis[node] = 0;
+    pq.push({0,node});
+
+    while(!pq.empty()){
+        ll curr = pq.top().second;
+        ll dist = pq.top().first;
+
+        pq.pop();
+
+        for(auto it : adj[curr]){
+            ll nei = it.first;
+            ll wt = it.second;
+
+            if(wt+dist<dis[nei]){
+                par[nei] = curr;
+                dis[nei] = wt+dist;
+                pq.push({dis[nei],nei});
+            }
+        }
+    }
+
+    return par;
+}
+ 
