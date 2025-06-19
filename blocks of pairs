@@ -1,0 +1,143 @@
+https://www.codechef.com/problems/COLARR7
+//blocks of pairs where we have choices to retain one of them or completely change both where each change have cost of 1
+#include <bits/stdc++.h>
+ 
+#define ll long long
+#define ld long double
+#define lld long long double
+#define mpr make_pair
+ 
+using namespace std;
+ 
+//==============================================================================
+void fl(vector<ll> &v,ll n){ for(ll i = 0;i<n;i++){ cin>>v[i];}}
+void fvv(vector<vector<ll>> &v,ll &n,ll &m){ for(ll i = 0;i<n;i++){ for(ll j=0;j<m;j++){ cin>>v[i][j]; }}}
+void fpp(vector<pair<ll,ll>> &v,ll &n){ for(ll i = 0;i<n;i++){ cin>>v[i].first>>v[i].second; }}
+ 
+void printl(vector<ll> &v,ll &n){ for(ll i = 0;i<n;i++){ cout<<v[i]<<" ";}}
+void printvv(vector<vector<ll>> &v,ll &n,ll &m){ for(ll i = 0;i<n;i++){ for(ll j=0;j<m;j++){ cout<<v[i][j]<<" "; }cout<<endl;}}
+void printpp(vector<pair<ll,ll>> &v,ll &n){ for(ll i = 0;i<n;i++){ cout<<v[i].first<<" "<<v[i].second<<" "; }}
+ 
+void sortl(vector<ll>& v){ sort(v.begin(),v.end());}
+void sortvv(vector<vector<ll>>& v){ sort(v.begin(),v.end());}
+void sortpp(vector<pair<ll,ll>>& v){ sort(v.begin(),v.end());}
+ 
+void sortlg(vector<ll>& v){ sort(v.begin(),v.end(),greater<>());}
+void sortvvg(vector<vector<ll>>& v){ sort(v.begin(),v.end(),greater<>());}
+void sortppg(vector<pair<ll,ll>>& v){ sort(v.begin(),v.end(),greater<>());}
+ 
+ll madd2(ll a,ll b,ll modu){ return ((a%modu)+(b%modu))%modu; };
+ll msub2(ll a,ll b,ll modu){ return ((a%modu)-(b%modu)+modu)%modu; };
+ll mmult2(ll a,ll b,ll modu){ return ((a%modu)*(b%modu))%modu; };
+ 
+ll madd3(ll a,ll b,ll c,ll modu){ return ((((a%modu)+(b%modu))%modu)+(c%modu))%modu;}
+ll msub3(ll a,ll b,ll c,ll modu){ return ((((a%modu)-(b%modu)+modu)%modu)-(c%modu)+modu)%modu;}
+ll mmult3(ll a,ll b,ll c,ll modu){ return ((((a%modu)*(b%modu))%modu)*(c%modu))%modu;}
+ 
+//================================================================================
+
+
+class DSU{
+    public: 
+       vector<ll> par;
+       vector<ll> size;
+       vector<bool> cyc;
+       vector<ll> self;
+       ll n;
+       DSU(ll n){
+           this->n = n;
+           par.resize(n+1);
+           size.resize(n+1,1);
+           cyc.resize(n+1);
+           
+           self.resize(n+1);
+
+           for(ll i=1;i<=n;i++){
+              par[i] = i;
+              cyc[i] = 0;
+              self[i] = 0;
+           }
+       }
+
+       ll find_par(ll v){
+          if(v==par[v]) return v;
+
+          return par[v] = find_par(par[v]);
+       }
+
+       bool isSameComp(ll u,ll v){
+          return find_par(v) == find_par(u);
+       }
+
+       void union_by_size(ll u,ll v){
+            if(!isSameComp(u,v)){
+                u = find_par(u);
+                v = find_par(v);
+
+                if(size[u]<size[v]) swap(u,v);
+
+                par[v] = u;
+                
+                if(cyc[v] == 1) cyc[u] = 1;
+                
+                self[u] += self[v];
+
+                size[u] += size[v];
+            }
+       }
+
+};
+int main(){
+  ll t;
+  cin>>t;
+ 
+  while(t--){
+    ll n;
+    cin>>n;
+  
+    vector<ll> a(2*n);
+
+    fl(a,2*n);
+    
+    DSU d(n);
+    
+    for(ll i=0;i<2*n;i+=2){
+        if(a[i] == a[i+1] ){
+            d.self[a[i]] = 1;
+            d.cyc[a[i]] = 1;
+        }
+    }
+    
+    for(ll i=0;i<2*n;i+=2){
+        if(d.isSameComp(a[i],a[i+1])){
+            d.cyc[d.par[a[i]]] = 1;
+        }
+        else{
+            d.union_by_size(a[i],a[i+1]);
+        }
+    }
+    
+    
+    
+    ll ans=0;
+    
+    // for(ll i=1;i<=n;i++){
+    //     cout<<d.cyc[i]<<" "<<d.self[i]<<" ";
+    // }
+    
+    for(ll i=1;i<=n;i++){
+        if(d.par[i] == i){
+            if(d.cyc[i]){
+                ans += (d.size[i]-d.self[i]);
+            }
+            else{
+                ans += (d.size[i]+1);
+            }
+        }
+    }
+    
+    cout<<ans<<endl;
+    
+    
+  }
+}
