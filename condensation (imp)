@@ -1,0 +1,168 @@
+https://www.hackerearth.com/practice/algorithms/graphs/strongly-connected-components/practice-problems/algorithm/gcd-on-directed-graph-1122228a/?purpose=login&source=problem-page&update=google
+#include <bits/stdc++.h>
+ 
+#define ll long long
+#define ld long double
+#define lld long long double
+#define mpr make_pair
+ 
+using namespace std;
+ 
+//==============================================================================
+void fl(vector<ll> &v,ll &n){ for(ll i = 0;i<n;i++){ cin>>v[i];}}
+void fvv(vector<vector<ll>> &v,ll &n,ll &m){ for(ll i = 0;i<n;i++){ for(ll j=0;j<m;j++){ cin>>v[i][j]; }}}
+void fpp(vector<pair<ll,ll>> &v,ll &n){ for(ll i = 0;i<n;i++){ cin>>v[i].first>>v[i].second; }}
+ 
+void printl(vector<ll> &v,ll &n){ for(ll i = 0;i<n;i++){ cout<<v[i]<<" ";}}
+void printvv(vector<vector<ll>> &v,ll &n,ll &m){ for(ll i = 0;i<n;i++){ for(ll j=0;j<m;j++){ cout<<v[i][j]<<" "; }cout<<endl;}}
+void printpp(vector<pair<ll,ll>> &v,ll &n){ for(ll i = 0;i<n;i++){ cout<<v[i].first<<" "<<v[i].second<<" "; }}
+ 
+void sortl(vector<ll>& v){ sort(v.begin(),v.end());}
+void sortvv(vector<vector<ll>>& v){ sort(v.begin(),v.end());}
+void sortpp(vector<pair<ll,ll>>& v){ sort(v.begin(),v.end());}
+ 
+void sortlg(vector<ll>& v){ sort(v.begin(),v.end(),greater<>());}
+void sortvvg(vector<vector<ll>>& v){ sort(v.begin(),v.end(),greater<>());}
+void sortppg(vector<pair<ll,ll>>& v){ sort(v.begin(),v.end(),greater<>());}
+ 
+ll madd2(ll a,ll b,ll modu){ return ((a%modu)+(b%modu))%modu; };
+ll msub2(ll a,ll b,ll modu){ return ((a%modu)-(b%modu)+modu)%modu; };
+ll mmult2(ll a,ll b,ll modu){ return ((a%modu)*(b%modu))%modu; };
+ 
+ll madd3(ll a,ll b,ll c,ll modu){ return ((((a%modu)+(b%modu))%modu)+(c%modu))%modu;}
+ll msub3(ll a,ll b,ll c,ll modu){ return ((((a%modu)-(b%modu)+modu)%modu)-(c%modu)+modu)%modu;}
+ll mmult3(ll a,ll b,ll c,ll modu){ return ((((a%modu)*(b%modu))%modu)*(c%modu))%modu;}
+
+ll __lcm(ll a,ll b){ return (a*b)/__gcd(a,b); }
+
+//================================================================================
+ 
+void dfs(vector<vector<ll>>& adj,ll node,vector<ll>& vis,vector<ll>& topo){
+    vis[node] = 1;
+    for(auto it : adj[node]){
+        if(!vis[it]) dfs(adj,it,vis,topo);
+    }
+
+     topo.push_back(node);
+}
+
+void rev_dfs(vector<vector<ll>>& adj,ll node,vector<ll>& vis,ll& clr){
+    vis[node] = clr;
+    for(auto it : adj[node]){
+        if(vis[it]==0) rev_dfs(adj,it,vis,clr);
+    }
+}
+
+
+void dfs3(vector<set<ll>>& adj,vector<ll>& gc,ll node,vector<ll>& vis3,vector<set<ll>>& dp){
+
+    vis3[node] = 1;
+
+    dp[node].insert(gc[node]);
+
+
+    for(auto it: adj[node]){
+        if(!vis3[it]){
+            dfs3(adj,gc,it,vis3,dp);
+        }
+        for(auto itt : dp[it]){
+            dp[node].insert(__gcd(itt,gc[node]));
+        }
+    }
+
+
+}
+
+ll scc(vector<vector<ll>>& adj,vector<ll>& c){
+    ll n = adj.size();
+    n--;
+
+    vector<ll> topo;
+    vector<ll> vis(n+1,0);
+
+    for(ll i=1;i<=n;i++){
+        if(!vis[i]){
+            dfs(adj,i,vis,topo);
+        }
+    }
+
+    reverse(topo.begin(),topo.end());
+
+    
+    vector<vector<ll>> rev_adj(n+1);
+
+    for(ll i=1;i<=n;i++){
+        for(auto it : adj[i]){
+            rev_adj[it].push_back(i);
+        }
+    }
+
+    for(ll i=1;i<=n;i++){
+        vis[i] = 0;
+    }
+
+    ll clr=1;
+
+    for(ll i=0;i<topo.size();i++){
+        if(vis[topo[i]]==0){
+            rev_dfs(rev_adj,topo[i],vis,clr);
+            clr++;
+        }
+    }
+
+    vector<set<ll>> ng(clr);
+
+    vector<ll> gc(clr,0);
+
+    for(ll i=1;i<=n;i++){
+        gc[vis[i]] = __gcd(gc[vis[i]],c[i-1]);
+        for(auto it : adj[i]){
+            if(vis[i] != vis[it]){
+                ng[vis[i]].insert(vis[it]);
+            }
+        }
+    }
+
+    vector<set<ll>> dp(clr);
+
+    vector<ll> vis3(clr,0);
+
+    for(ll i=1;i<clr;i++){
+        if(vis3[i] == 0) dfs3(ng,gc,i,vis3,dp);
+    }
+
+    ll ans = 1e14;
+
+    for(ll i=1;i<clr;i++){
+        ll val = *(dp[i].begin());
+        ans = min(ans,val);
+    }
+    
+    return ans;
+}
+
+int main(){
+   
+    ll n,m;
+    cin>>n>>m;
+
+    vector<ll> c(n);
+    fl(c,n);
+
+    vector<vector<ll>> adj(n+1);
+
+    for(ll i=0;i<m;i++){
+        ll u,v;
+        cin>>u>>v;
+
+        adj[u].push_back(v);
+    }
+
+
+    cout<<scc(adj,c)<<endl;;
+
+    
+
+}
+
+
